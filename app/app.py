@@ -5,11 +5,13 @@ from model import ml
 import pandas as pd
 import zipfile
 from etl import ETLmachine
+from metrics import Calculate_metrics
 
 
 app = FastAPI()
 model = None
 etl = ETLmachine()
+metrics = Calculate_metrics()
 
 
 @app.post("/fit")
@@ -80,6 +82,19 @@ async def make_base_etl(data: UploadFile, target_name: str, test_size: float):
         media_type='application/zip',
         headers={'Content-Disposition': 'attachment; filename=dataset.zip'}
     )
+
+@app.post('/calculate_metrics_regression')
+async def calculate_metrics_regression(y_true: UploadFile, y_pred: UploadFile):
+    content_true = await y_true.read()
+    y_t = pd.read_csv(io.BytesIO(content_true))
+
+    content_pred = await y_pred.read()
+    y_p = pd.read_csv(io.BytesIO(content_pred))
+
+    global metrics
+    r2, mae, mape, mse = metrics.main_calculations_r(y_t, y_p)
+
+    return {'r2': r2, 'mae': mae, 'mape': mape, 'mse': mse}
 
 
 @app.get('/status')
