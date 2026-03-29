@@ -2,5 +2,5 @@
 /app/w/
 /app/__pycache__/
 .env
-AMZN_2006-01-01_to_2018-01-01.csv
-val_x.csv
+*.csv
+*.ipynb

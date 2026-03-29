@@ -13,7 +13,7 @@ class ml():
         self._target_name = None
 
 
-    def fit(self, X, y, type: str, target_name: str):
+    def fit(self, X, y, type: str):
         if type == 'c':
             self.model = TabPFNClassifier(model_path=self._weights_path_c, device=self.device)
         elif type == 'r':
@@ -23,7 +23,7 @@ class ml():
         
         self.model.fit(X, y)
 
-        self._target_name = target_name
+        self._target_name = y.columns[0]
         self._is_fitted = True
 
     

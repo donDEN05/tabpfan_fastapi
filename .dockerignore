@@ -1,0 +1,8 @@
+__pycache__
+.venv
+.env
+.gitignore
+dockerfile
+*.md
+*.ipynb
+*.csv

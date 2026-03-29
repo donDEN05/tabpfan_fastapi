@@ -3,24 +3,29 @@ from fastapi import FastAPI, UploadFile
 from fastapi.responses import StreamingResponse
 from model import ml
 import pandas as pd
+import zipfile
+from etl import ETLmachine
 
 
 app = FastAPI()
 model = None
+etl = ETLmachine()
+
 
 @app.post("/fit")
-async def fit(data: UploadFile, target_name: str, task_type: str):
-    content = await data.read()
-    df = pd.read_csv(io.BytesIO(content))
+async def fit(X: UploadFile, y: UploadFile, task_type: str):
+    content_x = await X.read()
+    X = pd.read_csv(io.BytesIO(content_x))
 
-    X = df.drop(columns=[target_name])
-    y = df[target_name]
+    content_y = await y.read()
+    y = pd.read_csv(io.BytesIO(content_y))
 
     global model
     model = ml()
-    model.fit(X, y, task_type, target_name)
+    model.fit(X, y, task_type)
 
     return model.health()
+
 
 @app.post('/predict')
 async def predict(data: UploadFile):
@@ -39,6 +44,43 @@ async def predict(data: UploadFile):
         media_type='text/csv',
         headers={'Content-Disposition': 'attachment; filename=predictions.csv'}
     )
+
+
+@app.post('/make_base_etl')
+async def make_base_etl(data: UploadFile, target_name: str, test_size: float):
+    content = await data.read()
+    df = pd.read_csv(io.BytesIO(content))
+
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_data:
+        global etl
+        X_train, y_train, X_val, y_val = etl.make_base(df, target_name, test_size)
+
+        x_t_buffer = io.StringIO()
+        x_v_buffer = io.StringIO()
+        y_t_buffer = io.StringIO()
+        y_v_buffer = io.StringIO()
+
+        X_train.to_csv(x_t_buffer, index=False)
+        zip_data.writestr('X_train', x_t_buffer.getvalue())
+
+        y_train.to_csv(y_t_buffer, index=False)
+        zip_data.writestr('y_train', y_t_buffer.getvalue())
+
+        X_val.to_csv(x_v_buffer, index=False)
+        zip_data.writestr('X_val', x_v_buffer.getvalue())
+
+        y_val.to_csv(y_v_buffer, index=False)
+        zip_data.writestr('y_val', y_v_buffer.getvalue())
+
+    zip_buffer.seek(0)
+
+    return StreamingResponse(
+        zip_buffer,
+        media_type='application/zip',
+        headers={'Content-Disposition': 'attachment; filename=dataset.zip'}
+    )
+
 
 @app.get('/status')
 def status():
