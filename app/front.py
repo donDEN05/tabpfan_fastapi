@@ -91,13 +91,13 @@ def make_etl():
 
     
 
-task = st.selectbox('Выберите задачу:', ['fit', 'predict', 'calculate metrics', 'make etl'])
+task = st.selectbox('Выберите задачу:', ['Сделать ETL', 'Обучить', 'Предсказать', 'Посчитать метрики'])
 
-if task == 'fit':
+if task == 'Обучить':
     fit()
-elif task == 'predict':
+elif task == 'Предсказать':
     predict()
-elif task == 'calculate metrics':
+elif task == 'Посчитать метрики':
     calculate_metrics()
-elif task == 'make etl':
+elif task == 'Сделать ETL':
     make_etl()

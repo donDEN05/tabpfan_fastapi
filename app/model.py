@@ -2,7 +2,7 @@ from tabpfn import TabPFNRegressor, TabPFNClassifier
 import pandas as pd
 class TABPFNmodel():
     def __init__(self):
-        self.device = 'cuda'
+        self.device = 'cpu'
         self._weights_path_c = 'w/tabpfn-v2.5-classifier-v2.5_default.ckpt'
         self._weights_path_r = 'w/tabpfn-v2.5-regressor-v2.5_default.ckpt'
         self.model = None
@@ -12,9 +12,9 @@ class TABPFNmodel():
 
     def fit(self, X, y, type: str):
         if type == 'Classification':
-            self.model = TabPFNClassifier(model_path=self._weights_path_c, device=self.device)
+            self.model = TabPFNClassifier(model_path=self._weights_path_c, device=self.device, ignore_pretraining_limits=True)
         elif type == 'Regression':
-            self.model = TabPFNRegressor(model_path=self._weights_path_r, device=self.device)
+            self.model = TabPFNRegressor(model_path=self._weights_path_r, device=self.device, ignore_pretraining_limits=True)
         else:
             print('Тип не выбран')
         

@@ -7,7 +7,8 @@ COPY . .
 RUN pip3 install -r requirements.txt
 
 EXPOSE 8000
+EXPOSE 8001
 
 WORKDIR /project/app
-
-CMD uvicorn app:app --reload --host 0.0.0.0 --port 8000
+RUN uvicorn app:app --reload --port 8000
+CMD streamlit run .\front.py --server.port 8001
