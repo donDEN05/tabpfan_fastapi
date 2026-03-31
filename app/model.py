@@ -1,9 +1,6 @@
 from tabpfn import TabPFNRegressor, TabPFNClassifier
 import pandas as pd
-from pathlib import Path
-
-
-class ml():
+class TABPFNmodel():
     def __init__(self):
         self.device = 'cuda'
         self._weights_path_c = 'w/tabpfn-v2.5-classifier-v2.5_default.ckpt'

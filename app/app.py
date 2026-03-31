@@ -1,7 +1,7 @@
 import io
 from fastapi import FastAPI, UploadFile
 from fastapi.responses import StreamingResponse
-from model import ml
+from model import TABPFNmodel
 import pandas as pd
 import zipfile
 from etl import ETLmachine
@@ -23,7 +23,7 @@ async def fit(X: UploadFile, y: UploadFile, task_type: str):
     y = pd.read_csv(io.BytesIO(content_y))
 
     global MODEL
-    MODEL = ml()
+    MODEL = TABPFNmodel()
     MODEL.fit(X, y, task_type)
 
     return MODEL.health()

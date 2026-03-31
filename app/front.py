@@ -1,6 +1,5 @@
 import streamlit as st
 import requests
-import io
 
 
 API_URL = st.sidebar.text_input('API base URL', value='http://localhost:8000')
@@ -49,9 +48,32 @@ def predict():
                 mime='text/csv'
             )
 
-task = st.selectbox('Выберите задачу:', ['fit', 'predict'])
+def calculate_metrics():
+    st.subheader('Подсчет метрик:')
+
+    y_true = st.file_uploader('Загрузите y_true', type='csv')
+    y_pred = st.file_uploader('Загрузите y_pred', type='csv')
+
+    if st.button('Посчитать'):
+        files = {
+            'y_true': (y_true.name, y_true.getvalue(), 'text/csv'),
+            'y_pred': (y_pred.name, y_pred.getvalue(), 'text/csv')
+        }
+        response = post('/calculate_metrics_regression', files)
+
+        if response:
+            st.success('Метрики посчитаны')
+            st.success(response.content)
+            
+def make_etl():
+    st.subheader('Сделать базовый ETL:')
+    
+
+task = st.selectbox('Выберите задачу:', ['fit', 'predict', 'calculate metrics'])
 
 if task == 'fit':
     fit()
 elif task == 'predict':
     predict()
+elif task == 'calculate metrics':
+    calculate_metrics()
