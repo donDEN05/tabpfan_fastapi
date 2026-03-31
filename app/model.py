@@ -14,9 +14,9 @@ class ml():
 
 
     def fit(self, X, y, type: str):
-        if type == 'c':
+        if type == 'Classification':
             self.model = TabPFNClassifier(model_path=self._weights_path_c, device=self.device)
-        elif type == 'r':
+        elif type == 'Regression':
             self.model = TabPFNRegressor(model_path=self._weights_path_r, device=self.device)
         else:
             print('Тип не выбран')

@@ -9,7 +9,7 @@ from metrics import Calculate_metrics
 
 
 app = FastAPI()
-model = None
+MODEL = None
 etl = ETLmachine()
 metrics = Calculate_metrics()
 
@@ -22,11 +22,11 @@ async def fit(X: UploadFile, y: UploadFile, task_type: str):
     content_y = await y.read()
     y = pd.read_csv(io.BytesIO(content_y))
 
-    global model
-    model = ml()
-    model.fit(X, y, task_type)
+    global MODEL
+    MODEL = ml()
+    MODEL.fit(X, y, task_type)
 
-    return model.health()
+    return MODEL.health()
 
 
 @app.post('/predict')
@@ -34,8 +34,8 @@ async def predict(data: UploadFile):
     content = await data.read()
     df = pd.read_csv(io.BytesIO(content))
 
-    global model
-    pred = model.predict(df)
+    global MODEL
+    pred = MODEL.predict(df)
 
     buffer = io.StringIO()
     pred.to_csv(buffer, index=False)
@@ -64,16 +64,16 @@ async def make_base_etl(data: UploadFile, target_name: str, test_size: float):
         y_v_buffer = io.StringIO()
 
         X_train.to_csv(x_t_buffer, index=False)
-        zip_data.writestr('X_train', x_t_buffer.getvalue())
+        zip_data.writestr('X_train.csv', x_t_buffer.getvalue())
 
         y_train.to_csv(y_t_buffer, index=False)
-        zip_data.writestr('y_train', y_t_buffer.getvalue())
+        zip_data.writestr('y_train.csv', y_t_buffer.getvalue())
 
         X_val.to_csv(x_v_buffer, index=False)
-        zip_data.writestr('X_val', x_v_buffer.getvalue())
+        zip_data.writestr('X_val.csv', x_v_buffer.getvalue())
 
         y_val.to_csv(y_v_buffer, index=False)
-        zip_data.writestr('y_val', y_v_buffer.getvalue())
+        zip_data.writestr('y_val.csv', y_v_buffer.getvalue())
 
     zip_buffer.seek(0)
 
@@ -99,5 +99,4 @@ async def calculate_metrics_regression(y_true: UploadFile, y_pred: UploadFile):
 
 @app.get('/status')
 def status():
-    global model
-    return model.health()
+    return MODEL.health()

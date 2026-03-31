@@ -3,14 +3,14 @@ import requests
 import io
 
 
-API_URL = st.sideber.text_input('API base URL', value='http://localhost:8000')
+API_URL = st.sidebar.text_input('API base URL', value='http://localhost:8000')
 
 st.title('TabPFN using')
 
-def post(method, files=None, data=None):
+def post(method, files=None, params=None):
     url = f'{API_URL}{method}'
 
-    response = requests.post(url, files=files, data=data)
+    response = requests.post(url, files=files, params=params)
     response.raise_for_status()
 
     return response
@@ -19,17 +19,17 @@ def fit():
     st.subheader('Обучите модель:')
 
     task_type = st.selectbox('Веберите task type', ['Regression', 'Classification'])
-    X_train = st.file_uploader('Загрузите X train', type='csv') # могут быть проблемы при загрузеке файлов
-    y_train = st.file_uploader('Загрузите y train', type='csv') # могут быть проблемы при загрузеке файлов
+    X_train = st.file_uploader('Загрузите X train', type='csv')
+    y_train = st.file_uploader('Загрузите y train', type='csv')
 
     if st.button('Обучить'):
         files = {'X': (X_train.name, X_train.getvalue(), 'text/csv'),
                 'y': (y_train.name, y_train.getvalue(), 'text/csv')}
-        data = {'task_type': task_type}
+        params = {'task_type': task_type}
 
-        response = post('/fit', files, data)
+        response = post('/fit', files=files, params=params)
         if response:
-            st.success('Модель обучена на даныых {X_train.name} и {y_train.name}')
+            st.success(f'Модель обучена на даныых {X_train.name} и {y_train.name}')
 
 def predict():
     st.subheader('Предсказание:')
@@ -41,10 +41,17 @@ def predict():
 
         response = post('/predict', files=files)
         if response:
+            st.success('Значения сгенерированы.')
             st.download_button(
                 label='Скачать predictions',
                 data=response.content,
                 file_name='predictions.csv',
                 mime='text/csv'
             )
-            
+
+task = st.selectbox('Выберите задачу:', ['fit', 'predict'])
+
+if task == 'fit':
+    fit()
+elif task == 'predict':
+    predict()
