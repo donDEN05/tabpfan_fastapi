@@ -67,9 +67,31 @@ def calculate_metrics():
             
 def make_etl():
     st.subheader('Сделать базовый ETL:')
+    data = st.file_uploader('Загрузите X', type='csv')
+    target_name = st.text_input('Название target')
+    test_size = st.number_input('размер валидационной выборки')
+
+    if st.button('Подготовить данные'):
+        files = {
+            'data': (data.name, data.getvalue(), 'text/csv')
+        }
+        params = {
+            'target_name': target_name,
+            'test_size': test_size
+        }
+        response = post('/make_base_etl', files=files, params=params)
+        if response:
+            st.success('Датасет готов')
+            st.download_button(
+                label='Скачать датасет',
+                data=response.content,
+                file_name='dataset.zip',
+                mime='application/zip'
+            )
+
     
 
-task = st.selectbox('Выберите задачу:', ['fit', 'predict', 'calculate metrics'])
+task = st.selectbox('Выберите задачу:', ['fit', 'predict', 'calculate metrics', 'make etl'])
 
 if task == 'fit':
     fit()
@@ -77,3 +99,5 @@ elif task == 'predict':
     predict()
 elif task == 'calculate metrics':
     calculate_metrics()
+elif task == 'make etl':
+    make_etl()
